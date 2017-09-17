@@ -38,7 +38,7 @@ int main (void) {
 			j--;
 		}
 		
-	printf("\n\nSum of factorial digits: %d\n", sum);
+	printf("\n\nSum of factorial digits: %d\n", sum
 
 	return 0;
 } 
