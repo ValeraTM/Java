@@ -19,7 +19,7 @@ int main (void) {
 			array[i] *= j; 					//  5! = 120
 		}
 		for (i = 0; i < NUM; i++) { 							
-			if (array[i] / DECIMAL > 0) { 				// в одном элементе должна находится одна цифра
+			if (array[i] / DECIMAL > 0) { 			// в одном элементе должна находится одна цифра
 				array[i+1] += array[i] / DECIMAL;  		 
 				array[i] = array[i] % DECIMAL;
 			}
