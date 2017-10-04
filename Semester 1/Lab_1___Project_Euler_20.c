@@ -24,10 +24,17 @@ void factorial_calculation (int *array, int n) {
 		for (int i = 0; i < NUM; i++) {			
 			*(array + i) *= j; 					
 		}
+<<<<<<< HEAD
 		for (int i = 0; i < NUM; i++) { 							
 			if (*(array + i) / DECIMAL > 0) { // в одном элементе должна находится одна цифра
 				*(array + i + 1) += *(array + i) / DECIMAL;  		 
 				*(array + i) = *(array + i) % DECIMAL;
+=======
+		for (i = 0; i < NUM; i++) { 							
+			if (array[i] / DECIMAL > 0) { 			// в одном элементе должна находится одна цифра
+				array[i+1] += array[i] / DECIMAL;  		 
+				array[i] = array[i] % DECIMAL;
+>>>>>>> 30f22097949d4c25fa73a124e5764b3283e8127b
 			}
 		}
 	}
@@ -43,8 +50,12 @@ void output (int j, int *array) {
 			j--;
 		}
 		
+<<<<<<< HEAD
 	printf("\n\nSum of factorial digits: %d\n", sum);
 }
+=======
+	printf("\n\nSum of factorial digits: %d\n", sum
+>>>>>>> 30f22097949d4c25fa73a124e5764b3283e8127b
 
 int main () {
 
