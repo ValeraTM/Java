@@ -38,9 +38,9 @@ void output (int j, int *array) {
 	int sum = 0;
 	printf("\nFactorial: ");
 	while (j >= 0) { 
-			sum += *(array + j);   
-			printf("%d", *(array + j)); // склеиваем элементы массива, начиная с конца
-			j--;
+		sum += *(array + j);   
+		printf("%d", *(array + j)); // склеиваем элементы массива, начиная с конца
+		j--;
 	}
 	printf("\n\nSum of factorial digits: %d\n", sum);
 }
