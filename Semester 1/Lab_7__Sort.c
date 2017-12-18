@@ -26,7 +26,6 @@ void free_file () {
         fclose(head->merge[i].file);
         remove(head->merge[i].name);
     }
-    
     free(head->merge);
     free(head);
 }
@@ -101,7 +100,6 @@ int min (void * array, int size, int el_size, int (*scan)(FILE *, const void *),
             idx = j;
         }
     }
-
     return idx;
 }
 
@@ -124,11 +122,8 @@ void merge (int el_size, int (*scan)(FILE *, const void *), void (*write)(FILE *
         write(out, array + idx*el_size, 1);
 
         if (scan(head->merge[idx].file, array + idx*el_size) == -1) {
-            while (idx != (size - 1)) {
-                swap(array + idx*el_size, array + (idx + 1)*el_size, el_size);
-                swap(&head->merge[idx], &head->merge[idx + 1], sizeof(struct list));
-                idx++;
-            }
+            swap(array + idx*el_size, array + (size - 1)*el_size, el_size);
+            swap(&head->merge[idx], &head->merge[size - 1], sizeof(struct list));
             size--;
         }
     }
