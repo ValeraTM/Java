@@ -18,7 +18,7 @@ struct tree {
 	struct tree * parent;
 	struct tree * left;
 	struct tree * right;
-} * root;
+};
 
 void print_tree (const struct tree *node) {
 	if (node == NULL) {
@@ -178,7 +178,7 @@ struct tree * balance (struct tree * node) {
 	return node;
 }
 
-void fixbalance (struct tree * node, const char * key) {
+void fixbalance (struct tree * root, struct tree * node, const char * key) {
 	while (node != root) {
 		if (strcmp(node->value.name, key) == -1) {
 			node->balance += -1;
@@ -228,6 +228,7 @@ int same (struct tree * node, const char * key) {
 
 //вставка нового узла
 void insert (struct tree * node, struct info p) {
+	struct tree * root = node;
 	while (NULL != node) {
 		if (same(node, p.name) == 1) {
 			return;
@@ -238,7 +239,7 @@ void insert (struct tree * node, struct info p) {
 				node->right = (struct tree *)calloc(1, sizeof(struct tree));
 				node->right->value = p;
 				node->right->parent = node;
-				fixbalance(node, p.name);
+				fixbalance(root, node, p.name);
 				return;
 			}		
 			node = node->right;
@@ -249,7 +250,7 @@ void insert (struct tree * node, struct info p) {
 				node->left = (struct tree *)calloc(1, sizeof(struct tree));
 				node->left->value = p;
 				node->left->parent = node;
-				fixbalance(node, p.name);
+				fixbalance(root, node, p.name);
 				return;
 			}
 			node = node->left;
@@ -258,7 +259,7 @@ void insert (struct tree * node, struct info p) {
 }
 
 //считывание данных из файла
-int read (FILE * data) {
+struct tree * read (struct tree * root, FILE * data) {
 	int rc;
 	if (NULL == root) {
 		root = (struct tree *)calloc(1, sizeof(struct tree));
@@ -266,7 +267,7 @@ int read (FILE * data) {
 		if ((rc = fscanf(data, "%s %d %d", &root->value.name, &root->value.data1, &root->value.data2)) != 3) {
 			printf("ERROR! Invalid input data\n");
 			free_tree(root);
-			return 1;
+			return NULL;
 		}
 	}
 
@@ -280,12 +281,12 @@ int read (FILE * data) {
 		if (rc != 3) {
 			printf("ERROR! Invalid input data\n");
 			free_tree(root);
-			return 1;
+			return NULL;
 		}
 		
 		insert(root, p);	
 	}
-	return 0;
+	return root;
 }
 
 //поиск слова
@@ -369,6 +370,7 @@ int check_balance (struct tree * node) {
 }
 
 int main (int argc, char * argv[]) {
+	struct tree * root = NULL;
 	FILE * data;
 
 	if (argc == 2) {
@@ -385,7 +387,7 @@ int main (int argc, char * argv[]) {
 
     clock_t start = clock();
 	printf("Reading...\n");
-    if (read(data) == 1) {
+    if ((root = read(root, data)) == NULL) {
     	fclose(data);
     	return -1;
     }
@@ -398,8 +400,8 @@ int main (int argc, char * argv[]) {
     else {
     	printf("This tree is unbalanced\n");
     }
-
     work(root);
+
     free_tree(root);
     fclose(data);
 	return 0;
