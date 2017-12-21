@@ -5,38 +5,40 @@
 #include <assert.h>
 #include <string.h>
 #include <time.h>
+#include <float.h>
 
-#define PART 100000
+#define PART_SIZE 100000
 #define SIZE 15
 
+int gradation = 1; //по возрастанию или по убыванию
+
 struct table {
-    struct list * merge;   
+    struct list * files;   
     int size;
     unsigned int number; //названия буферных файлов
-    int gradation; //по возрастанию или по убыванию
-} * head;
+};
 
 struct list {
     FILE * file;
     char name[SIZE];
 };
 
-void free_file () {
+void free_file (struct table * head) {
     for (int i = 0; i < head->size; i++) {
-        fclose(head->merge[i].file);
-        remove(head->merge[i].name);
+        fclose(head->files[i].file);
+        remove(head->files[i].name);
     }
-    free(head->merge);
+    free(head->files);
     free(head);
 }
 
 //названия файлов
-void str (struct list * p) {
+void file_names (struct table * head, int k) {
     int i = 0;
     int num = head->number;
-    memset(p->name, 0, SIZE);
+    memset(head->files[k].name, 0, SIZE);
     while (num > 0) {
-        p->name[i] = '0' + num % 10;
+        head->files[k].name[i] = '0' + num % 10;
         num = num / 10;
         i++;
     }
@@ -46,15 +48,16 @@ void str (struct list * p) {
 int double_cmp (const void * x1, const void * y1) {
     double x = *(double *)x1;
     double y = *(double *)y1;
-    if (x == y) {
+
+    if (fabs(x - y) < DBL_EPSILON) {
         return 0;
     }
     else {
-        if (x > y) {
-            return 1 * head->gradation;
+        if (x - y > 0) {
+            return 1 * gradation;
         }
         else {
-            return -1 * head->gradation;
+            return - 1 * gradation;
         }
     }
 }
@@ -89,8 +92,7 @@ void swap (void * x, void * y, int el_size) {
     }
 }
 
-
-int min (void * array, int size, int el_size, int (*scan)(FILE *, const void *), int (*cmp)(const void *, const void *)) {
+int min (void * array, int size, int el_size, int (*cmp)(const void *, const void *)) {
     void * min = array;
     int idx = 0;
 
@@ -103,27 +105,27 @@ int min (void * array, int size, int el_size, int (*scan)(FILE *, const void *),
     return idx;
 }
 
-void merge (int el_size, int (*scan)(FILE *, const void *), void (*write)(FILE *, const void *, int), 
+void merge (struct table * head, int el_size, int (*scan)(FILE *, const void *), void (*write)(FILE *, const void *, int), 
     int (*cmp)(const void *, const void *)) {
 
     int size = head->size;
-    void * array = (void *)calloc(size, el_size);
+    void * array = calloc(size, el_size);
 
     for (int i = 0; i < size; i++) {
-        fseek(head->merge[i].file, 0, SEEK_SET); 
-        scan(head->merge[i].file, array + i*el_size);
+        fseek(head->files[i].file, 0, SEEK_SET); 
+        scan(head->files[i].file, array + i*el_size);
     }
 
     FILE * out = fopen("output.txt", "w");
 
     int idx = 0;
     while (size > 1) {
-        idx = min(array, size, el_size, scan, cmp);
+        idx = min(array, size, el_size, cmp);
         write(out, array + idx*el_size, 1);
 
-        if (scan(head->merge[idx].file, array + idx*el_size) == -1) {
+        if (scan(head->files[idx].file, array + idx*el_size) == -1) {
             swap(array + idx*el_size, array + (size - 1)*el_size, el_size);
-            swap(&head->merge[idx], &head->merge[size - 1], sizeof(struct list));
+            swap(&head->files[idx], &head->files[size - 1], sizeof(struct list));
             size--;
         }
     }
@@ -133,39 +135,60 @@ void merge (int el_size, int (*scan)(FILE *, const void *), void (*write)(FILE *
     fclose(out);
 }
 
-void sort (void * array, int size, size_t el_size, int (*cmp)(const void *, const void *)) {
-    int i = 0;
-    int j = size;
+void sort (void * array, void * new, int left, int right, int el_size, int (*cmp)(const void *, const void *)) {
+    if (left == right) {
+        return;
+    }
+    int mid = (left + right)/2;
+    sort(array, new, left, mid, el_size, cmp);
+    sort(array, new, mid + 1, right, el_size, cmp);
 
-    do {
-        while (cmp(array + i*el_size, array) == -1) {
+    int i = left;
+    int j = mid + 1;
+    int k = 0;
+    while (i <= mid && j <= right) {
+        int rm = 0;
+        if ((rm = cmp(array + i*el_size, array + j*el_size)) == 0) {
+            memcpy(new + k*el_size, array + i*el_size, el_size);
+            k++;
+            memcpy(new + k*el_size, array + j*el_size, el_size);
             i++;
+            j++;
         }
-
-        while (cmp(array + j*el_size, array) == 1) {
-            j--;
+        else {
+            if (rm == 1) {
+                memcpy(new + k*el_size, array + j*el_size, el_size);
+                j++;
+            }
+            else {
+                memcpy(new + k*el_size, array + i*el_size, el_size);
+                i++;
+            }
         }
-
-        if (i <= j) {
-            swap(array + i*el_size, array + j*el_size, el_size);
-            i++;
-            j--;
-        }
-    } while (i <= j);
-
-    if (j > 0) {
-        sort(array, j, el_size, cmp);  
+        k++;
     }
 
-    if (i < size) {
-        sort(array + i*el_size, size - i, el_size, cmp);
+    while (i <= mid) {
+        memcpy(new +k*el_size, array + i*el_size, el_size);
+        i++;
+        k++;
+    }
+
+    while (j <= right) {
+        memcpy(new + k*el_size, array + j*el_size, el_size);
+        j++;
+        k++;
+    }
+
+    for (i = 0; i < right - left + 1; i++) {
+        memcpy(array + left*el_size + i*el_size, new + i*el_size, el_size);
     }
 }
 
 int read_double (FILE * data, int * count, void * array) {
     int rm = 0;
     double * arr = (double *)array;
-    for (int i = 0; i < PART; i++) {
+    for (int i = 0; i < PART_SIZE; i++) {
         if ((rm = fscanf(data, "%lf", &arr[i])) == -1) {
             break;
         }
@@ -174,11 +197,12 @@ int read_double (FILE * data, int * count, void * array) {
     return rm;
 }
 
-void read (FILE * data, size_t el_size, int (*part_read)(FILE *, int *, void *), 
+void read (struct table * head, FILE * data, size_t el_size, int (*part_read)(FILE *, int *, void *), 
     void (*write)(FILE *, const void *, int), int (*cmp)(const void *, const void *)) {
 
-    head->merge = (struct list *)calloc(1, sizeof(struct list));
-    void * array = (void *)calloc(PART, el_size);
+    head->files = (struct list *)calloc(1, sizeof(struct list));
+    void * array = calloc(PART_SIZE, el_size);
+    void * new = calloc(PART_SIZE, el_size);
     int rm = 0;
     int i = 0;
     int size = 2;
@@ -189,58 +213,59 @@ void read (FILE * data, size_t el_size, int (*part_read)(FILE *, int *, void *),
             break;
         }
         
-        sort(array, count - 1, el_size, cmp);
+        sort(array, new, 0, count - 1, el_size, cmp);
 
-        str(&head->merge[i]);
-        head->merge[i].file = fopen(head->merge[i].name, "w+");
+        file_names(head, i);
+        head->files[i].file = fopen(head->files[i].name, "w+");
 
         if (rm != -1) {
-            head->merge = realloc(head->merge, size*sizeof(struct list));
+            head->files = realloc(head->files, size*sizeof(struct list));
         }
         size++;
         
-        write(head->merge[i].file, array, count);
+        write(head->files[i].file, array, count);
         memset(array, 0, el_size*count);
         i++;
     }
     head->size = i;
     free(array);
+    free(new);
 }
 
 int main (int argc, char * argv[]) {
-    head = (struct table *)calloc(1, sizeof(struct table));
+    struct table * head = (struct table *)calloc(1, sizeof(struct table));
     head->number = 1;
     FILE * data;
     if (argc == 3) {
         data = fopen(argv[1], "r");
-        if (strcmp(argv[2], "-up") == 0) {
-            head->gradation = 1;
-        }
-        if (strcmp(argv[2], "-down") == 0) {
-            head->gradation = -1;
-        }
         if (data == NULL) {
             printf("File open error\n");
             return 1;
         }
+        if (strcmp(argv[2], "-up") == 0) {
+            gradation = 1;
+        }
+        if (strcmp(argv[2], "-down") == 0) {
+            gradation = -1;
+        }
     }
     else {
-        printf("Not arguments\n");
+        printf("Not enough arguments\n");
         return 1;
     }
     
     clock_t start = clock();
     printf("Reading...\n");
-    read(data, sizeof(double), read_double, write_double, double_cmp);
+    read(head, data, sizeof(double), read_double, write_double, double_cmp);
     clock_t finish = clock();
     printf("Passed %f seconds\n", ((float)(finish - start)) / CLOCKS_PER_SEC);
 
     start = clock();
-    merge(sizeof(double), scan_double, write_double, double_cmp);
+    merge(head, sizeof(double), scan_double, write_double, double_cmp);
     finish = clock();
     printf("Passed %f seconds\n", ((float)(finish - start)) / CLOCKS_PER_SEC);
 
-    free_file();
+    free_file(head);
     fclose(data);
     return 0;
 } 
