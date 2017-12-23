@@ -7,10 +7,8 @@
 #include <time.h>
 #include <float.h>
 
-#define PART_SIZE 100000
+#define PART_SIZE 10000
 #define SIZE 15
-
-int gradation = 1; //по возрастанию или по убыванию
 
 struct table {
     struct list * files;   
@@ -54,10 +52,10 @@ int double_cmp (const void * x1, const void * y1) {
     }
     else {
         if (x - y > 0) {
-            return 1 * gradation;
+            return 1;
         }
         else {
-            return - 1 * gradation;
+            return - 1;
         }
     }
 }
@@ -71,7 +69,6 @@ void write_double (FILE * file, const void * x1, int n) {
 
 int scan_double (FILE * file, const void * x1) {
     double * x = (double *)x1;
-    
     if (fscanf(file, "%lf", x) == -1) {
         return -1;
     }
@@ -92,12 +89,12 @@ void swap (void * x, void * y, int el_size) {
     }
 }
 
-int min (void * array, int size, int el_size, int (*cmp)(const void *, const void *)) {
+int min (void * array, int size, int el_size, int gradation, int (*cmp)(const void *, const void *)) {
     void * min = array;
     int idx = 0;
 
     for (int j = 1; j < size; j++) {
-        if (cmp(array + j*el_size, min) == -1) {
+        if (cmp(array + j*el_size, min) == -1*gradation) {
             min = array + j*el_size;
             idx = j;
         }
@@ -105,7 +102,7 @@ int min (void * array, int size, int el_size, int (*cmp)(const void *, const voi
     return idx;
 }
 
-void merge (struct table * head, int el_size, int (*scan)(FILE *, const void *), void (*write)(FILE *, const void *, int), 
+void merge (struct table * head, int el_size, int gradation, int (*scan)(FILE *, const void *), void (*write)(FILE *, const void *, int), 
     int (*cmp)(const void *, const void *)) {
 
     int size = head->size;
@@ -116,11 +113,11 @@ void merge (struct table * head, int el_size, int (*scan)(FILE *, const void *),
         scan(head->files[i].file, array + i*el_size);
     }
 
-    FILE * out = fopen("output.txt", "w");
+    FILE * out = fopen(".txt", "w");
 
     int idx = 0;
     while (size > 1) {
-        idx = min(array, size, el_size, cmp);
+        idx = min(array, size, el_size, gradation, cmp);
         write(out, array + idx*el_size, 1);
 
         if (scan(head->files[idx].file, array + idx*el_size) == -1) {
@@ -131,17 +128,21 @@ void merge (struct table * head, int el_size, int (*scan)(FILE *, const void *),
     }
     write(out, array, 1);
 
+    while (scan(head->files[0].file, array) != -1) {
+        write(out, array, 1);
+    }
+
     free(array);
     fclose(out);
 }
 
-void sort (void * array, void * new, int left, int right, int el_size, int (*cmp)(const void *, const void *)) {
+void sort (void * array, void * new, int left, int right, int el_size, int gradation, int (*cmp)(const void *, const void *)) {
     if (left == right) {
         return;
     }
     int mid = (left + right)/2;
-    sort(array, new, left, mid, el_size, cmp);
-    sort(array, new, mid + 1, right, el_size, cmp);
+    sort(array, new, left, mid, el_size, gradation, cmp);
+    sort(array, new, mid + 1, right, el_size, gradation, cmp);
 
     int i = left;
     int j = mid + 1;
@@ -156,7 +157,7 @@ void sort (void * array, void * new, int left, int right, int el_size, int (*cmp
             j++;
         }
         else {
-            if (rm == 1) {
+            if (rm == (1*gradation)) {
                 memcpy(new + k*el_size, array + j*el_size, el_size);
                 j++;
             }
@@ -197,7 +198,7 @@ int read_double (FILE * data, int * count, void * array) {
     return rm;
 }
 
-void read (struct table * head, FILE * data, size_t el_size, int (*part_read)(FILE *, int *, void *), 
+void read (struct table * head, FILE * data, size_t el_size, int gradation, int (*part_read)(FILE *, int *, void *), 
     void (*write)(FILE *, const void *, int), int (*cmp)(const void *, const void *)) {
 
     head->files = (struct list *)calloc(1, sizeof(struct list));
@@ -213,7 +214,7 @@ void read (struct table * head, FILE * data, size_t el_size, int (*part_read)(FI
             break;
         }
         
-        sort(array, new, 0, count - 1, el_size, cmp);
+        sort(array, new, 0, count - 1, el_size, gradation, cmp);
 
         file_names(head, i);
         head->files[i].file = fopen(head->files[i].name, "w+");
@@ -235,6 +236,7 @@ void read (struct table * head, FILE * data, size_t el_size, int (*part_read)(FI
 int main (int argc, char * argv[]) {
     struct table * head = (struct table *)calloc(1, sizeof(struct table));
     head->number = 1;
+    int gradation = 0;
     FILE * data;
     if (argc == 3) {
         data = fopen(argv[1], "r");
@@ -256,12 +258,12 @@ int main (int argc, char * argv[]) {
     
     clock_t start = clock();
     printf("Reading...\n");
-    read(head, data, sizeof(double), read_double, write_double, double_cmp);
+    read(head, data, sizeof(double), gradation, read_double, write_double, double_cmp);
     clock_t finish = clock();
     printf("Passed %f seconds\n", ((float)(finish - start)) / CLOCKS_PER_SEC);
 
     start = clock();
-    merge(head, sizeof(double), scan_double, write_double, double_cmp);
+    merge(head, sizeof(double), gradation, scan_double, write_double, double_cmp);
     finish = clock();
     printf("Passed %f seconds\n", ((float)(finish - start)) / CLOCKS_PER_SEC);
 
