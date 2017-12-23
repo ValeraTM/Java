@@ -8,7 +8,7 @@
 #include <float.h>
 
 #define PART_SIZE 10000
-#define SIZE 15
+#define SIZE_NAME 15
 
 struct table {
     struct list * files;   
@@ -18,7 +18,7 @@ struct table {
 
 struct list {
     FILE * file;
-    char name[SIZE];
+    char name[SIZE_NAME];
 };
 
 void free_file (struct table * head) {
@@ -113,7 +113,7 @@ void merge (struct table * head, int el_size, int gradation, int (*scan)(FILE *,
         scan(head->files[i].file, array + i*el_size);
     }
 
-    FILE * out = fopen(".txt", "w");
+    FILE * out = fopen("output.txt", "w");
 
     int idx = 0;
     while (size > 1) {
