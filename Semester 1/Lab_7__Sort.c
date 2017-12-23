@@ -6,8 +6,9 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
+#include "sort_merge.h"
 
-#define PART_SIZE 10000
+#define PART_SIZE 100000
 #define SIZE_NAME 15
 
 struct table {
@@ -34,7 +35,7 @@ void free_file (struct table * head) {
 void file_names (struct table * head, int k) {
     int i = 0;
     int num = head->number;
-    memset(head->files[k].name, 0, SIZE);
+    memset(head->files[k].name, 0, SIZE_NAME);
     while (num > 0) {
         head->files[k].name[i] = '0' + num % 10;
         num = num / 10;
@@ -134,56 +135,6 @@ void merge (struct table * head, int el_size, int gradation, int (*scan)(FILE *,
 
     free(array);
     fclose(out);
-}
-
-void sort (void * array, void * new, int left, int right, int el_size, int gradation, int (*cmp)(const void *, const void *)) {
-    if (left == right) {
-        return;
-    }
-    int mid = (left + right)/2;
-    sort(array, new, left, mid, el_size, gradation, cmp);
-    sort(array, new, mid + 1, right, el_size, gradation, cmp);
-
-    int i = left;
-    int j = mid + 1;
-    int k = 0;
-    while (i <= mid && j <= right) {
-        int rm = 0;
-        if ((rm = cmp(array + i*el_size, array + j*el_size)) == 0) {
-            memcpy(new + k*el_size, array + i*el_size, el_size);
-            k++;
-            memcpy(new + k*el_size, array + j*el_size, el_size);
-            i++;
-            j++;
-        }
-        else {
-            if (rm == (1*gradation)) {
-                memcpy(new + k*el_size, array + j*el_size, el_size);
-                j++;
-            }
-            else {
-                memcpy(new + k*el_size, array + i*el_size, el_size);
-                i++;
-            }
-        }
-        k++;
-    }
-
-    while (i <= mid) {
-        memcpy(new +k*el_size, array + i*el_size, el_size);
-        i++;
-        k++;
-    }
-
-    while (j <= right) {
-        memcpy(new + k*el_size, array + j*el_size, el_size);
-        j++;
-        k++;
-    }
-
-    for (i = 0; i < right - left + 1; i++) {
-        memcpy(array + left*el_size + i*el_size, new + i*el_size, el_size);
-    }
 }
 
 int read_double (FILE * data, int * count, void * array) {
