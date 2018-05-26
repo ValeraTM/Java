@@ -110,14 +110,14 @@ int move_horse (int height, int width, int idx, int num, int * chess_desk) {
 int main () {
 	int height = 0;
 	int width = 0;
-	printf("Please tepe the size of field\n");
+	printf("Please type the size of field\n");
 	scanf("%d %d", &height, &width);
 	int * chess_desk = (int *)calloc(height*width, sizeof(int));
 
 	printf("Please type the coordinates of begining\n");
 	int x, y;
 	scanf("%d %d", &y, &x);
-	chess_desk[(y - 1)*width + x - 1] = 1;
+	chess_desk[(y - 1)*width + (x - 1)] = 1;
 
 	if (move_horse(height, width, (y - 1)*width + x - 1, 1, chess_desk) == -1) {
 		printf("Sorry, this way not exist\n");

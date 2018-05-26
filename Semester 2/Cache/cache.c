@@ -51,7 +51,7 @@ int put (struct LRUcache * cache, int value) {
 	}
 	struct node * p = insert(cache->main_table, value);
 	if (p->used == 1) {
-		return -1;
+		get(cache, p->id);
 	}
 	else {
 		p->used = 1;
@@ -86,18 +86,16 @@ void remove_cache (struct LRUcache * cache) {
 }
 
 void work (struct LRUcache * cache) {
-	char * key = (char *)calloc(10, sizeof(char));
+	char key[15];
 	while (1) {
-		scanf("%s", key);
+		scanf("%15s", key);
 		if (strcmp(key, "exit") == 0) {
 			break;
 		}
 		int value;
 		if (strcmp(key, "put") == 0) {
 			scanf("%d", &value);
-			if (put(cache, value) == -1) {
-				printf("This value exist\n");
-			}
+			put(cache, value);
 		}
 		if (strcmp(key, "get") == 0) {
 			scanf("%d", &value);
@@ -116,7 +114,6 @@ void work (struct LRUcache * cache) {
 		}
 		printf("\n");
 	}
-	free(key);
 }
 
 int main (int argc, char * argv[]) {
@@ -124,9 +121,13 @@ int main (int argc, char * argv[]) {
     cache->main_table = create_hashtable();
     printf("Please type the size of cache\n");
     scanf("%d", &(cache->max_size));
-    printf("<get X> or <put X> or <remove> or <exit>\n");
-
-    work(cache);
+    if (cache->max_size == 0) {
+    	printf("Unacceptable size\n");
+    }
+    else {
+	    printf("<get X> or <put X> or <remove> or <exit>\n");
+	    work(cache);
+	}
     free_node(cache->main_table);
     free(cache);
 	return 0;

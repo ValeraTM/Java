@@ -352,7 +352,7 @@ int decoder (FILE * out) {
 
 	free_tree(root);
 	fclose(data);
-	clock_t finish = clock();
+	finish = clock();
     printf("Passed %f seconds\n", ((float)(finish - start)) / CLOCKS_PER_SEC);
 	return 0;
 }
