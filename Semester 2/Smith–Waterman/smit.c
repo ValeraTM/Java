@@ -17,7 +17,6 @@ struct elem {
 	int value;
 	int gap_open_up;
 	int gap_open_left;
-	struct elem * next;
 	struct elem * from;
 };
 
