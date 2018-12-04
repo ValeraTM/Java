@@ -10,13 +10,9 @@ public:
 			return nullptr;
 		}
 		
-		/*Creator creator = (*it).second;
-		Product * u = creator();
-		return u;*/
 		return (*it).second();
 	}
 	bool registerProduct(const Id& id, const Creator& creator) {
-		// TODO register_twice
 		creators[id] = creator;
 		return true;
 	}

@@ -19,7 +19,6 @@ public:
 	~MARS();
 private:
 	void readyCore();
-	//void print(); //FIX
 
 	std::vector<std::pair<size_t, std::string>> warrior;
 	static const size_t STD_SIZE;

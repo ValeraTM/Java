@@ -65,37 +65,3 @@ void MARS::readyCore() {
 		}
 	}
 }
-
-
-//////////////////////////////////////////////////////////////////////////////
-/*void MARS::print() {
-	std::cin.get();
-	std::system("clear");
-	int field[capacity] = {};
-	int count = 1;
-	for (auto it = warrior.begin(); it != warrior.end(); it++) {
-		field[(*it).first] = count;
-		count++;
-	}
-
-	for (int i = 0; i < 10; i++) {
-		for (int j = 0; j < 10; j++) {
-			if (field[i*10 + j] == 0) {
-				std::cout << ". ";
-			}
-			else {
-				std::cout << field[i*10 + j] << " ";
-			}
-		}
-		std::cout << std::endl;
-	}
-
-	std::cout << std::endl;
-	for (auto it = warrior.begin(); it != warrior.end(); it++) {
-		std::cout << CORE[(*it).first]->name();
-		std::cout << " " << CORE[(*it).first]->operandA() << " " << CORE[(*it).first]->operandB();
-		std::cout << std::endl;
-	}
-
-	//std::cin.get();
-}*/
