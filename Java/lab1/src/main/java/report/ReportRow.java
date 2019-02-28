@@ -21,7 +21,7 @@ public class ReportRow implements Comparable<ReportRow>, Iterable<String> {
 
     @Override
     public int compareTo(ReportRow it) {
-        int cmp = report.get(0).compareTo(it.report.get(0));
+        int cmp = Integer.compare(Integer.parseInt(report.get(0)), Integer.parseInt(it.report.get(0)));
         if (cmp == 0) {
             return report.get(1).compareTo(it.report.get(1));
         }

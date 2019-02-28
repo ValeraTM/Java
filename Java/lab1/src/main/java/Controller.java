@@ -1,7 +1,5 @@
-import report.ReportRow;
-import report.StatisticsReport;
-import stat.TextStatistics;
-import stat.WordStat;
+import report.*;
+import stat.*;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
