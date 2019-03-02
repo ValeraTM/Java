@@ -1,17 +1,12 @@
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
 class WordReader {
-    WordReader(FileInputStream file, int sizeTemp) {
+    WordReader(InputStream file, int sizeTemp) {
         reader = new InputStreamReader(file);
-        if (sizeTemp > 0) {
-            temp = new char[sizeTemp];
-        }
-        else {
-            temp = new char[16];
-        }
+        temp = new char[sizeTemp];
     }
 
     String read() throws IOException {

@@ -1,38 +1,34 @@
 import report.*;
 import stat.*;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public class Controller {
-    public static void main(String[] args) {
-        try {
-            WordReader reader = new WordReader(new FileInputStream(args[0]), Integer.parseInt(args[1]));
-            TextStatistics stat = new TextStatistics();
-            while (true) {
-                String word = reader.read();
-                if (word == null) {
-                    break;
-                }
-                stat.addWord(word);
+class Controller {
+    Controller(InputStream in, OutputStream out, int sizeTemp) throws IOException {
+        WordReader reader = new WordReader(in, sizeTemp);
+        TextStatistics stat = new TextStatistics();
+        while (true) {
+            String word = reader.read();
+            if (word == null) {
+                break;
             }
-            reader.close();
-
-            StatisticsReport rep = new StatisticsReport();
-            for (WordStat it : stat.getStatistics()) {
-                rep.addReportRow(Integer.toString(it.getCount()), it.getWord(),
-                        String.format("%.2f", 100*(double)it.getCount()/(double)stat.getWordCount()));
-            }
-
-            CSVWriter writer = new CSVWriter(new FileOutputStream("out.csv"));
-            for (ReportRow it : rep) {
-                writer.write(it.getReport());
-            }
-            writer.close();
+            stat.addWord(word);
         }
-        catch (IOException ex) {
-            ex.printStackTrace();
+        reader.close();
+
+        ReportGenerator gen = new ReportGenerator(stat.getStatistics());
+        StatisticsReport rep = new StatisticsReport();
+        for (WordStat it : gen) {
+            rep.addReportRow(Integer.toString(it.getCount()), it.getWord(),
+                    String.format("%.3f", 100*(double)it.getCount()/(double)stat.getWordCount()));
         }
+
+        CSVWriter writer = new CSVWriter(out);
+        for (ReportRow it : rep) {
+            writer.write(it.getReport());
+        }
+        writer.close();
     }
 }

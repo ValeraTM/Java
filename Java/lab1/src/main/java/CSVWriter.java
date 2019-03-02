@@ -1,15 +1,16 @@
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.ArrayList;
+import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Iterator;
 
 class CSVWriter {
-    CSVWriter(FileOutputStream file) {
-        writer = new OutputStreamWriter(file);
+    CSVWriter(OutputStream file) {
+        writer = new OutputStreamWriter(file, Charset.forName("UTF-8"));
     }
-    void write(ArrayList<String> rep) throws IOException {
+    void write(Collection<String> rep) throws IOException {
         StringBuilder res = new StringBuilder();
         Iterator<String> it = rep.iterator();
         if (isEmpty) {

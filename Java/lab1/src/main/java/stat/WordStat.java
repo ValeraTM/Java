@@ -1,23 +1,18 @@
 package stat;
 
-public class WordStat {
+public class WordStat implements Comparable<WordStat> {
     WordStat(String word) {
         this.word = word;
         frequency = 1;
     }
 
     @Override
-    public int hashCode() {
-        return word.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this.getClass() != obj.getClass()) {
-            return false;
+    public int compareTo(WordStat it) {
+        int cmp = Integer.compare(frequency, it.frequency);
+        if (cmp == 0) {
+            return word.compareTo(it.word);
         }
-        WordStat it = (WordStat) obj;
-        return word.equals(it.word);
+        return -1*cmp;
     }
 
     void addCount() {
@@ -30,6 +25,6 @@ public class WordStat {
         return frequency;
     }
 
-    private String word;
+    private final String word;
     private int frequency;
 }

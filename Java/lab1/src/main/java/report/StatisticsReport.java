@@ -1,11 +1,12 @@
 package report;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.TreeSet;
+import java.util.List;
 
 public class StatisticsReport implements Iterable<ReportRow> {
     public StatisticsReport() {
-        set = new TreeSet<>();
+        set = new ArrayList<>();
     }
 
     public void addReportRow(String ... data) {
@@ -17,5 +18,5 @@ public class StatisticsReport implements Iterable<ReportRow> {
         return set.iterator();
     }
 
-    private TreeSet<ReportRow> set;
+    private List<ReportRow> set;
 }

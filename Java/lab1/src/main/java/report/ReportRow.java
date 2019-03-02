@@ -1,32 +1,16 @@
 package report;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collection;
 
-public class ReportRow implements Comparable<ReportRow>, Iterable<String> {
+public class ReportRow {
     ReportRow(String ... info) {
-        report = new ArrayList<>();
-        report.addAll(Arrays.asList(info));
+        report = Arrays.asList(info);
     }
 
-    public ArrayList<String> getReport() {
+    public Collection<String> getReport() {
         return report;
     }
 
-    @Override
-    public Iterator<String> iterator() {
-        return report.iterator();
-    }
-
-    @Override
-    public int compareTo(ReportRow it) {
-        int cmp = Integer.compare(Integer.parseInt(report.get(0)), Integer.parseInt(it.report.get(0)));
-        if (cmp == 0) {
-            return report.get(1).compareTo(it.report.get(1));
-        }
-        return -1*cmp;
-    }
-
-    private ArrayList<String> report;
+    private final Collection<String> report;
 }
