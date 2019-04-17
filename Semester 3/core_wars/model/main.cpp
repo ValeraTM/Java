@@ -49,9 +49,9 @@ int main(int argc, char ** argv) {
 		return -1;
 	}
 
-	size_t size = 0;
-	std::cout << "Enter size of field" << std::endl;
-	std::cin >> size;
+	size_t size = 100;
+	//std::cout << "Enter size of field" << std::endl;
+	//std::cin >> size;
 
 	MARS mars(size);
 	for (int i = 1; i < argc; i++) {

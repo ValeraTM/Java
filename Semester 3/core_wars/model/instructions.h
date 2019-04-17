@@ -11,9 +11,7 @@ public:
 	void initialize(const std::pair<char, int>& A1, const std::pair<char, int>& B1);
 	int& operandA();
 	int& operandB();
-	
-	//временно
-	std::string name();
+    std::string info();
 
 	virtual Instruction* clone() = 0;
 	virtual bool run(Executing_context& program, size_t& idx) = 0;

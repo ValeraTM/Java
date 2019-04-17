@@ -6,6 +6,6 @@ size_t Executing_context::size() {
 	return capacity;
 }
 
-Instruction** Executing_context::operator[](size_t idx) {
-	return &CORE[idx % capacity];
+std::unique_ptr<Instruction>& Executing_context::operator[](size_t idx) {
+    return CORE[idx % capacity];
 }

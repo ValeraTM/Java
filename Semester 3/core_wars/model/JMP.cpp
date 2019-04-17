@@ -26,7 +26,7 @@ JMP* JMP::clone() {
 }
 
 bool JMP::run(Executing_context& program, size_t& idx) {
-	Instruction* itA = *program[idx + A.second];
+    std::unique_ptr<Instruction>& itA = program[idx + A.second];
 
 	switch (A.first) {
 		case Immediate:
@@ -42,7 +42,6 @@ bool JMP::run(Executing_context& program, size_t& idx) {
 			return false;
 	}
 }
-
 
 namespace {
 	bool ok = Factory<std::string, Instruction, Instruction* (*)()>::getInstance()->

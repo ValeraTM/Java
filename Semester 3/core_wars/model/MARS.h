@@ -13,13 +13,12 @@ class MARS : public Executing_context {
 public:
 	MARS();
 	MARS(size_t size);
-	void fulfill_instructions();
-	std::string* WAR(size_t limit);
-	void add_warrior(std::vector<Instruction*>& arr, std::string& nameWarrior);
+    bool fulfill_instructions(size_t& idx);
+    int add_warrior(std::string code);
+    void readyCore();
+    std::string getInfo(int idx);
 	~MARS();
 private:
-	void readyCore();
-
-	std::vector<std::pair<size_t, std::string>> warrior;
+    bool toInstruction(std::vector<Instruction*>& arr, std::string code);
 	static const size_t STD_SIZE;
 };

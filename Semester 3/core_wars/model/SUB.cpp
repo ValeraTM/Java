@@ -26,10 +26,10 @@ SUB* SUB::clone() {
 }
 
 bool SUB::run(Executing_context& program, size_t& idx) {
-	Instruction* itB = *program[idx + B.second];
-	Instruction* itB2 = *program[idx + itB->operandB() + B.second];
-	Instruction* itA = *program[idx + A.second];
-	Instruction* itA2 = *program[idx + itA->operandB() + A.second];
+    std::unique_ptr<Instruction>& itB = program[idx + B.second];
+    std::unique_ptr<Instruction>& itB2 = program[idx + itB->operandB() + B.second];
+    std::unique_ptr<Instruction>& itA = program[idx + A.second];
+    std::unique_ptr<Instruction>& itA2 = program[idx + itA->operandB() + A.second];
 
 	if (A.first == Immediate) {
 		switch (B.first) {
@@ -86,7 +86,6 @@ bool SUB::run(Executing_context& program, size_t& idx) {
 	idx = (idx + 1) % program.size();
 	return true;
 }
-
 
 namespace {
 	bool ok = Factory<std::string, Instruction, Instruction* (*)()>::getInstance()->

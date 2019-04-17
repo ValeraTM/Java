@@ -2,8 +2,9 @@
 #include "factory.h"
 #include "Executing_context.h"
 
-#include <cstddef>
 #include <assert.h>
+#include <cstddef>
+#include <memory>
 
 const char MOV::Immediate = '#';
 const char MOV::Relative = '$';
@@ -26,22 +27,20 @@ MOV* MOV::clone() {
 }
 
 bool MOV::run(Executing_context& program, size_t& idx) {
-	Instruction** itB = program[idx + B.second];
-	Instruction** itB2 = program[idx + (*itB)->operandB() + B.second];
-	Instruction** itA = program[idx + A.second];
-	Instruction** itA2 = program[idx + (*itA)->operandB() + A.second];
-
-	Instruction* temp = nullptr;
+    std::unique_ptr<Instruction>& itB = program[idx + B.second];
+    std::unique_ptr<Instruction>& itB2 = program[idx + itB->operandB() + B.second];
+    std::unique_ptr<Instruction>& itA = program[idx + A.second];
+    std::unique_ptr<Instruction>& itA2 = program[idx + itA->operandB() + A.second];
 
 	if (A.first == Immediate) {
 		switch (B.first) {
 			case Immediate:
 				return false;
 			case Relative:
-				(*itB)->operandB() = A.second;
+                itB->operandB() = A.second;
 				break;
 			case Indirect:
-				(*itB2)->operandB() = A.second;
+                itB2->operandB() = A.second;
 				break;
 			default:
 				assert(false && "Undefined mode!");
@@ -54,14 +53,10 @@ bool MOV::run(Executing_context& program, size_t& idx) {
 			case Immediate:
 				return false;
 			case Relative:
-				temp = *itB;
-				*itB = (*itA)->clone();
-				delete temp;
+                itB.reset(itA->clone());
 				break;
 			case Indirect:
-				temp = *itB2;
-				*itB2 = (*itA)->clone();
-				delete temp;
+                itB2.reset(itA->clone());
 				break;
 			default:
 				assert(false && "Undefined mode!");
@@ -74,14 +69,10 @@ bool MOV::run(Executing_context& program, size_t& idx) {
 			case Immediate:
 				return false;
 			case Relative:
-				temp = *itB;
-				*itB = (*itA2)->clone();
-				delete temp;
+                itB.reset(itA2->clone());
 				break;
 			case Indirect:
-				temp = *itB2;
-				*itB2 = (*itA2)->clone();
-				delete temp;
+                itB2.reset(itA2->clone());
 				break;
 			default:
 				assert(false && "Undefined mode!");
