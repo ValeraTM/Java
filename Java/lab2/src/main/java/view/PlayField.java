@@ -5,13 +5,11 @@ import java.awt.*;
 import java.util.Arrays;
 
 public class PlayField extends JPanel {
-    static final Color EMPTY = Color.BLACK;
-
     PlayField(int height, int width) {
         this.height = height;
         this.width = width;
         colors = new Color[height*width];
-        Arrays.fill(colors, EMPTY);
+        Arrays.fill(colors, Color.BLACK);
     }
 
     @Override
@@ -31,9 +29,7 @@ public class PlayField extends JPanel {
                 painter.drawRect(j*sizeX, i*sizeY, sizeX, sizeY);
             }
         }
-
     }
-
 
     void fillRect(int idx, Color color) {
         colors[idx] = color;

@@ -7,7 +7,6 @@ import java.util.LinkedList;
 
 public class Glass {
     public static final Color EMPTY = Color.BLACK;
-
     Glass(int height, int width) {
         this.height = height;
         this.border = height - 4;
@@ -47,9 +46,6 @@ public class Glass {
         }
         return count;
     }
-    public Color getColor(int x, int y) {
-        return field.get(y)[x];
-    }
 
     private void destroyRow(int row) {
         field.remove(row);
@@ -60,6 +56,9 @@ public class Glass {
         field.addLast(line);
     }
 
+    public Color getColor(int x, int y) {
+        return field.get(y)[x];
+    }
     public boolean isEmpty(int x, int y) {
         return field.get(y)[x] == EMPTY;
     }
@@ -71,6 +70,14 @@ public class Glass {
     }
     int getBorder() {
         return border;
+    }
+
+    void clear() {
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
+                field.get(i)[j] = EMPTY;
+            }
+        }
     }
 
     private LinkedList<Color[]> field;

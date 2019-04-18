@@ -6,12 +6,13 @@ import model.figures.Shape;
 import javax.swing.*;
 import java.awt.*;
 
-public class NewGame extends JPanel {
-    public NewGame(int height, int width) {
+public class NewGame extends JPanel implements Gui {
+    public NewGame(int height, int width, Scores records) {
+        this.records = records;
         this.height = height;
         this.width = width;
         field = new PlayField(height, width);
-        this.setVisible(false);
+
         this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         this.add(Box.createHorizontalGlue());
@@ -45,7 +46,11 @@ public class NewGame extends JPanel {
 
         info.add(infoScores);
         info.add(Box.createVerticalGlue());
+
         this.add(Box.createHorizontalGlue());
+    }
+    public void setParent(StartMenu frame) {
+        this.frame = frame;
     }
 
     public void showNextFigure(Shape figure) {
@@ -66,7 +71,7 @@ public class NewGame extends JPanel {
                     this.field.fillRect((height - 1 - i)*width + j, field.getColor(j, i));
                 }
                 else {
-                    this.field.fillRect((height - 1 - i)*width + j, PlayField.EMPTY);
+                    this.field.fillRect((height - 1 - i)*width + j, Glass.EMPTY);
                 }
             }
         }
@@ -77,12 +82,12 @@ public class NewGame extends JPanel {
         for (int i = 0; i < figure.getHeight(); i++) {
             for (int j = 0; j < figure.getWidth(); j++) {
                 if (!figure.isEmpty(j, i)) {
-                    field.fillRect((height - 1 - (y - i))*width + x + j, PlayField.EMPTY);
+                    field.fillRect((height - 1 - (y - i))*width + x + j, Glass.EMPTY);
                 }
             }
         }
     }
-    public void repaintFigure(Shape figure, int x, int y) {
+    public void paintFigure(Shape figure, int x, int y) {
         for (int i = 0; i < figure.getHeight(); i++) {
             for (int j = 0; j < figure.getWidth(); j++) {
                 if (!figure.isEmpty(j, i)) {
@@ -97,9 +102,20 @@ public class NewGame extends JPanel {
         scores.setText(Integer.toString(newScores));
     }
 
+    @Override
+    public void saveRecord(int score) {
+        this.removeAll();
+        String result = JOptionPane.showInputDialog(this, "Enter the name", "Player");
+        records.addNewRecord(result, score);
+        records.saveRecords();
+        frame.changeVisibleNewGame();
+    }
+
     private int height;
     private int width;
     private JLabel scores = new JLabel("0");
+    private Scores records;
     private PlayField field;
     private NextFigure nextFigure;
+    private StartMenu frame;
 }

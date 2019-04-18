@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 
-public class NextFigure extends JPanel {
-    public static final Color EMPTY = Color.BLACK;
+class NextFigure extends JPanel {
+    private static final Color EMPTY = Color.BLACK;
 
     NextFigure(int height, int width) {
         this.setMaximumSize(new Dimension(width*60, 10000));
@@ -17,7 +17,7 @@ public class NextFigure extends JPanel {
         Arrays.fill(colors, EMPTY);
 
         JLabel label = new JLabel("Next Figure");
-        label.setFont(new Font("Name", Font.BOLD, 23));
+        label.setFont(new Font("Name", Font.BOLD, 22));
         this.add(label);
         this.add(Box.createVerticalStrut(10));
 
@@ -27,6 +27,7 @@ public class NextFigure extends JPanel {
                 int sizeX = this.getWidth()/width;
                 int sizeY = this.getHeight()/height;
                 int sizeRect = Integer.min(sizeX, sizeY);
+
                 Graphics2D painter = (Graphics2D)g;
                 super.paint(painter);
                 painter.setStroke(new BasicStroke(2));
@@ -34,7 +35,7 @@ public class NextFigure extends JPanel {
                     for (int j = 0; j < width; j++) {
                         painter.setColor(colors[i*width + j]);
                         painter.fillRect(j*sizeRect, i*sizeRect, sizeRect, sizeRect);
-                        painter.setColor(Color.LIGHT_GRAY);
+                        painter.setColor(Color.WHITE);
                         painter.drawRect(j*sizeRect, i*sizeRect, sizeRect, sizeRect);
                     }
                 }

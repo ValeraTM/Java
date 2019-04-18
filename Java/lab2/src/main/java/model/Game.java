@@ -1,11 +1,15 @@
 package model;
 
 import model.figures.Shape;
+import view.Gui;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
 import java.io.InputStream;
 
 public class Game {
-    public Game(int width, int height, InputStream config) throws Exception {
+    public Game(int width, int height, InputStream config, Gui observer) throws Exception {
+        this.observer = observer;
         factory = new Factory(config);
         field = new Glass(height, width);
         figure = getNewFigure();
@@ -13,8 +17,37 @@ public class Game {
         x = width/2;
         y = height - 1;
     }
+    public void startGame() {
+        observer.repaintField(field);
+        observer.paintFigure(figure, x ,y);
+        observer.showNextFigure(newFigure);
 
-    public boolean moveLeft() {
+        timer = new Timer(delay, (ActionEvent event) -> {
+            observer.clearFigure(figure, x, y);
+            if (!moveDown()) {
+                if (!fall()) {
+                    timer.stop();
+                    clear();
+                    observer.saveRecord(score);
+                    return;
+                }
+
+                timer.setDelay(delay - score/1000*25);
+
+                if (checkFilledRow()) {
+                    observer.setScores(score);
+                }
+                observer.repaintField(field);
+                observer.showNextFigure(newFigure);
+            }
+            observer.paintFigure(figure, x, y);
+        });
+
+        timer.start();
+    }
+
+    public void moveLeft() {
+        observer.clearFigure(figure, x ,y);
         if (x != 0) {
             boolean canMove = true;
             for (int i = 0; i < figure.getHeight(); i++) {
@@ -28,12 +61,12 @@ public class Game {
             }
             if (canMove) {
                 x--;
-                return true;
             }
         }
-        return false;
+        observer.paintFigure(figure, x ,y);
     }
-    public boolean moveRight() {
+    public void moveRight() {
+        observer.clearFigure(figure, x ,y);
         if (x + figure.getWidth() != field.getWidth()) {
             boolean canMove = true;
             for (int i = 0; i < figure.getHeight(); i++) {
@@ -47,12 +80,11 @@ public class Game {
             }
             if (canMove) {
                 x++;
-                return true;
             }
         }
-        return false;
+        observer.paintFigure(figure, x ,y);
     }
-    public boolean moveDown() {
+    private boolean moveDown() {
         if (y - figure.getHeight() + 1 != 0) {
             boolean canMove = true;
             for (int j = figure.getHeight() - 1; j >= 0; j--) {
@@ -79,21 +111,24 @@ public class Game {
         return true;
     }
     public boolean rotateLeft() {
+        observer.clearFigure(figure, x, y);
         figure.rotateLeft();
         if (!canRotate()) {
             figure.rotateRight();
+            observer.paintFigure(figure, x ,y);
             return false;
         }
+        observer.paintFigure(figure, x, y);
         return true;
     }
-    public boolean fall() {
+    private boolean fall() {
         if (y > field.getBorder()) {
             return false;
         }
         field.setFigure(figure, x, y);
         return true;
     }
-    public boolean checkFilledRow() {
+    private boolean checkFilledRow() {
         int count = field.destroyFilledRow();
 
         switch (count) {
@@ -117,24 +152,18 @@ public class Game {
 
         return count != 0;
     }
-
-    public int getScore() {
-        return score;
+    private void clear() {
+        figure = getNewFigure();
+        newFigure = getNewFigure();
+        x = field.getWidth()/2;
+        y = field.getHeight() - 1;
+        field.clear();
     }
-    public Glass getField() {
-        return field;
+    public void setDelay(int delay) {
+        timer.setDelay(delay);
     }
-    public Shape getNextFigure() {
-        return newFigure;
-    }
-    public Shape getFigure() {
-        return figure;
-    }
-    public int getX() {
-        return x;
-    }
-    public int getY() {
-        return y;
+    public void setInitialDelay() {
+        timer.setDelay(delay - score/1000*25);
     }
 
     private Shape getNewFigure() {
@@ -166,4 +195,7 @@ public class Game {
     private int score = 0;
     private Factory factory;
     private Glass field;
+    private Gui observer;
+    private int delay = 500;
+    private Timer timer;
 }
