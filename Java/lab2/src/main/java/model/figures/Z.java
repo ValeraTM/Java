@@ -1,13 +1,13 @@
 package model.figures;
 
-import java.awt.Color;
+import model.Cell;
 
 public class Z extends Shape {
     private final static int[] SIZE = {3, 2};
     private final static String[] FORMS = {"**__**", "_****_"};
     private int idxForm;
 
-    public Z(int idxForm, Color color) {
+    public Z(int idxForm, Cell color) {
         this.idxForm = idxForm % FORMS.length;
         this.color = color;
         super.width = SIZE[this.idxForm % 2];

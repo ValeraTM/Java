@@ -1,12 +1,12 @@
 package model.figures;
 
-import java.awt.Color;
+import model.Cell;
 
 public class O extends Shape {
     private final static int[] SIZE = {2};
     private final static String[] FORMS = {"****"};
 
-    public O(int idxForm, Color color) {
+    public O(int idxForm, Cell color) {
         super.color = color;
         super.width = SIZE[0];
         super.height = SIZE[0];

@@ -2,17 +2,17 @@ package model;
 
 import model.figures.Shape;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Properties;
+import java.util.Random;
 
-class Factory {
+public class Factory {
     private final Properties creators = new Properties();
     private final Object[] keys;
     private final Random random = new Random();
 
-    Factory(InputStream config) throws IOException {
+    public Factory(InputStream config) throws IOException {
         creators.load(config);
         keys = creators.keySet().toArray();
     }
@@ -26,6 +26,6 @@ class Factory {
         if (null == product) {
             return null;
         }
-        return (Shape)product.getConstructor(int.class, Color.class).newInstance(Math.abs(random.nextInt()), new Color(random.nextInt()));
+        return (Shape)product.getConstructor(int.class, Cell.class).newInstance(Math.abs(random.nextInt()), new Cell(random.nextInt()));
     }
 }

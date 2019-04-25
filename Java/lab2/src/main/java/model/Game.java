@@ -1,53 +1,86 @@
 package model;
 
 import model.figures.Shape;
-import view.Gui;
+import observer.Observable;
+import observer.Observer;
 
-import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.event.ActionEvent;
-import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
 
-public class Game {
-    public Game(int width, int height, InputStream config, Gui observer) throws Exception {
-        this.observer = observer;
-        factory = new Factory(config);
+public class Game implements Observable {
+    public Game(int width, int height, Factory factory) {
+        observers = new LinkedList<>();
+        this.factory = factory;
         field = new Glass(height, width);
         figure = getNewFigure();
         newFigure = getNewFigure();
         x = width/2;
         y = height - 1;
     }
+
+    @Override
+    public void notifyObservers(Update mark) {
+        for (Observer it : observers) {
+            switch (mark) {
+                case FIELD:
+                    it.updateField(field);
+                    break;
+                case NEXT_FIGURE:
+                    it.updateNextFigure(newFigure);
+                    break;
+                case SCORE:
+                    it.updateScore(score);
+                    break;
+                case RECORD:
+                    records.addNewRecord(it.getRecord(), score);
+            }
+        }
+    }
+
+    @Override
+    public void removeObserver(Observer o) {
+        observers.remove(o);
+    }
+
+    @Override
+    public void registerObserver(Observer o) {
+        observers.add(o);
+    }
+
     public void startGame() {
-        observer.repaintField(field);
-        observer.paintFigure(figure, x ,y);
-        observer.showNextFigure(newFigure);
+        field.updateFigure(figure, y, x, figure.getCell());
+        notifyObservers(Update.FIELD);
+        notifyObservers(Update.NEXT_FIGURE);
 
         timer = new Timer(delay, (ActionEvent event) -> {
-            observer.clearFigure(figure, x, y);
+            field.updateFigure(figure, y, x, Cell.EMPTY);
             if (!moveDown()) {
                 if (!fall()) {
-                    timer.stop();
+                    notifyObservers(Update.RECORD);
                     clear();
-                    observer.saveRecord(score);
                     return;
                 }
 
                 timer.setDelay(delay - score/1000*25);
 
                 if (checkFilledRow()) {
-                    observer.setScores(score);
+                    notifyObservers(Update.SCORE);
                 }
-                observer.repaintField(field);
-                observer.showNextFigure(newFigure);
+
+                notifyObservers(Update.NEXT_FIGURE);
             }
-            observer.paintFigure(figure, x, y);
+            field.updateFigure(figure, y, x, figure.getCell());
+            notifyObservers(Update.FIELD);
         });
 
+        timer.setInitialDelay(delay*3);
         timer.start();
     }
 
     public void moveLeft() {
-        observer.clearFigure(figure, x ,y);
+        field.updateFigure(figure, y, x, Cell.EMPTY);
         if (x != 0) {
             boolean canMove = true;
             for (int i = 0; i < figure.getHeight(); i++) {
@@ -63,10 +96,11 @@ public class Game {
                 x--;
             }
         }
-        observer.paintFigure(figure, x ,y);
+        field.updateFigure(figure, y, x, figure.getCell());
+        notifyObservers(Update.FIELD);
     }
     public void moveRight() {
-        observer.clearFigure(figure, x ,y);
+        field.updateFigure(figure, y, x, Cell.EMPTY);
         if (x + figure.getWidth() != field.getWidth()) {
             boolean canMove = true;
             for (int i = 0; i < figure.getHeight(); i++) {
@@ -82,8 +116,55 @@ public class Game {
                 x++;
             }
         }
-        observer.paintFigure(figure, x ,y);
+        field.updateFigure(figure, y, x, figure.getCell());
+        notifyObservers(Update.FIELD);
     }
+    public boolean rotateRight() {
+        field.updateFigure(figure, y, x, Cell.EMPTY);
+        figure.rotateRight();
+        if (!canRotate()) {
+            figure.rotateLeft();
+            field.updateFigure(figure, y, x, figure.getCell());
+            return false;
+        }
+        field.updateFigure(figure, y, x, figure.getCell());
+        notifyObservers(Update.FIELD);
+        return true;
+    }
+    public boolean rotateLeft() {
+        field.updateFigure(figure, y, x, Cell.EMPTY);
+        figure.rotateLeft();
+        if (!canRotate()) {
+            figure.rotateRight();
+            field.updateFigure(figure, y, x, figure.getCell());
+            return false;
+        }
+        field.updateFigure(figure, y, x, figure.getCell());
+        notifyObservers(Update.FIELD);
+        return true;
+    }
+    public void setDelay(int delay) {
+        timer.setDelay(delay);
+    }
+    public void setInitialDelay() {
+        timer.setDelay(delay - score/1000*25);
+    }
+    public void clear() {
+        timer.stop();
+        figure = getNewFigure();
+        newFigure = getNewFigure();
+        x = field.getWidth()/2;
+        y = field.getHeight() - 1;
+        field.clear();
+        notifyObservers(Update.FIELD);
+    }
+    public void saveRecords() {
+        records.saveRecords();
+    }
+    public List getRecords() {
+        return records.getRecords();
+    }
+
     private boolean moveDown() {
         if (y - figure.getHeight() + 1 != 0) {
             boolean canMove = true;
@@ -101,25 +182,6 @@ public class Game {
             }
         }
         return false;
-    }
-    public boolean rotateRight() {
-        figure.rotateRight();
-        if (!canRotate()) {
-            figure.rotateLeft();
-            return false;
-        }
-        return true;
-    }
-    public boolean rotateLeft() {
-        observer.clearFigure(figure, x, y);
-        figure.rotateLeft();
-        if (!canRotate()) {
-            figure.rotateRight();
-            observer.paintFigure(figure, x ,y);
-            return false;
-        }
-        observer.paintFigure(figure, x, y);
-        return true;
     }
     private boolean fall() {
         if (y > field.getBorder()) {
@@ -152,20 +214,6 @@ public class Game {
 
         return count != 0;
     }
-    private void clear() {
-        figure = getNewFigure();
-        newFigure = getNewFigure();
-        x = field.getWidth()/2;
-        y = field.getHeight() - 1;
-        field.clear();
-    }
-    public void setDelay(int delay) {
-        timer.setDelay(delay);
-    }
-    public void setInitialDelay() {
-        timer.setDelay(delay - score/1000*25);
-    }
-
     private Shape getNewFigure() {
         try {
             return factory.createRandomProduct();
@@ -195,7 +243,8 @@ public class Game {
     private int score = 0;
     private Factory factory;
     private Glass field;
-    private Gui observer;
+    private List<Observer> observers;
     private int delay = 500;
     private Timer timer;
+    private Scores records = new Scores();
 }
