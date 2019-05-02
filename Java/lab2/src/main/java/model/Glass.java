@@ -20,10 +20,12 @@ public class Glass {
     }
 
     void setFigure(Shape figure, int x, int y) {
-        for (int i = 0; i < figure.getHeight(); i++) {
-            for (int j = 0; j < figure.getWidth(); j++) {
-                if (figure.getEnd(j, i)) {
-                    field.get(y - i)[x + j] = figure.getCell();
+        for (int i = 0; i < figure.getEndY(); i++) {
+            for (int j = 0; j < figure.getEndX(); j++) {
+                if (y - figure.getOffsetY() -i >= 0 && x + j + figure.getOffsetX() >= 0 && x + j + figure.getOffsetX() < width) {
+                    if (figure.getEnd(j, i)) {
+                        field.get(y - i - figure.getOffsetY())[x + j + figure.getOffsetX()] = figure.getCell();
+                    }
                 }
             }
         }

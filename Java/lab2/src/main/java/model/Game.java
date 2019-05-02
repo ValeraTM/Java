@@ -6,6 +6,7 @@ import observer.Observer;
 
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
+import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,6 +19,14 @@ public class Game implements Observable {
         newFigure = getNewFigure();
         x = width/2;
         y = height - 1;
+
+        try {
+            ObjectInputStream file = new ObjectInputStream(new FileInputStream("src/main/resources/HighScores.ser"));
+            records = (Scores)file.readObject();
+        }
+        catch (Exception ex) {
+            records = new Scores();
+        }
     }
 
     @Override
@@ -51,6 +60,7 @@ public class Game implements Observable {
 
     public void startGame() {
         field.updateFigure(figure, y, x, figure.getCell());
+        notifyObservers(Update.SCORE);
         notifyObservers(Update.FIELD);
         notifyObservers(Update.NEXT_FIGURE);
 
@@ -87,8 +97,13 @@ public class Game implements Observable {
                 if (y - i >= field.getHeight()) {
                     continue;
                 }
-                if (!field.isEmpty(x - 1,y - i) && !figure.isEmpty(0, i)) {
-                    canMove = false;
+                for (int j = 0; j < figure.getWidth(); j++) {
+                    if (!field.isEmpty(x + j - 1, y - i) && !figure.isEmpty(j, i)) {
+                        canMove = false;
+                        break;
+                    }
+                }
+                if (!canMove) {
                     break;
                 }
             }
@@ -107,8 +122,13 @@ public class Game implements Observable {
                 if (y - i >= field.getHeight()) {
                     continue;
                 }
-                if (!field.isEmpty(x + figure.getWidth(), y - i) && !figure.isEmpty(figure.getWidth() - 1, i)) {
-                    canMove = false;
+                for (int j = figure.getWidth() - 1; j >= 0; j--) {
+                    if (!field.isEmpty(x + j + 1, y - i) && !figure.isEmpty(j, i)) {
+                        canMove = false;
+                        break;
+                    }
+                }
+                if (!canMove) {
                     break;
                 }
             }
@@ -156,6 +176,7 @@ public class Game implements Observable {
         x = field.getWidth()/2;
         y = field.getHeight() - 1;
         field.clear();
+        score = 0;
         notifyObservers(Update.FIELD);
     }
     public void saveRecords() {
@@ -174,6 +195,9 @@ public class Game implements Observable {
                         canMove = false;
                         break;
                     }
+                }
+                if (!canMove) {
+                    break;
                 }
             }
             if (canMove) {
@@ -246,5 +270,5 @@ public class Game implements Observable {
     private List<Observer> observers;
     private int delay = 500;
     private Timer timer;
-    private Scores records = new Scores();
+    private Scores records;
 }

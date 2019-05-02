@@ -3,9 +3,8 @@ package model.figures;
 import model.Cell;
 
 public class Bomb extends Shape {
-    private final static int[] SIZE = {3, 3};
-    private final static String[] FORMS = {"____*____"};
-    private final static String[] ACTION = {"*********"};
+    private final static int[] SIZE = {1, 1};
+    private final static String[] FORMS = {"*"};
     private final static int RADIUS = 3;
 
     public Bomb(int idxForm, Cell color) {
@@ -17,7 +16,27 @@ public class Bomb extends Shape {
     @Override
     public boolean getEnd(int x, int y) {
         color = Cell.EMPTY;
-        return ACTION[0].charAt(y*RADIUS + x) == BUSY;
+        return (x >= 0 && x < RADIUS && y >= 0 && y < RADIUS);
+    }
+
+    @Override
+    public int getEndY() {
+        return RADIUS;
+    }
+
+    @Override
+    public int getEndX() {
+        return RADIUS;
+    }
+
+    @Override
+    public int getOffsetX() {
+        return -1;
+    }
+
+    @Override
+    public int getOffsetY() {
+        return -1;
     }
 
     @Override

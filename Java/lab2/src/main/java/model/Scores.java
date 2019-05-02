@@ -1,14 +1,12 @@
 package model;
 
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.TreeSet;
 
-class Scores {
-    private class Records implements Comparable<Records> {
+class Scores implements Serializable {
+    private class Records implements Comparable<Records>, Serializable {
         @Override
         public int compareTo(Records it) {
             int cmp = Integer.compare(score, it.score);
@@ -32,18 +30,6 @@ class Scores {
         int score;
     }
 
-    Scores() {
-        try {
-            Scanner scanner = new Scanner(new FileInputStream("src/main/resources/HighScores.txt"));
-            while (scanner.hasNext()) {
-                topPlayers.add(new Records(scanner.next(), Integer.parseInt(scanner.next())));
-            }
-        }
-        catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-
     void addNewRecord(String name, int score) {
         topPlayers.add(new Records(name, score));
         if (topPlayers.size() > 10) {
@@ -53,11 +39,9 @@ class Scores {
 
     void saveRecords() {
         try {
-            Writer writer = new OutputStreamWriter(new FileOutputStream("src/main/resources/HighScores.txt"));
-            for (Records it : topPlayers) {
-                writer.write(it.name + " " + it.score + '\n');
-            }
-            writer.close();
+            ObjectOutputStream file = new ObjectOutputStream(new FileOutputStream("src/main/resources/HighScores.ser"));
+            file.writeObject(this);
+            file.close();
         }
         catch (IOException ex) {
             ex.printStackTrace();

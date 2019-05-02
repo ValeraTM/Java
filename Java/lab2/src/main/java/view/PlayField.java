@@ -25,12 +25,6 @@ public class PlayField extends JPanel {
             for (int j = 0; j < width; j++  ) {
                 painter.setColor(colors[i*width + j]);
                 painter.fillRect(x + j*size, i*size, size, size);
-                if (colors[i*width + j] != Color.BLACK) {
-                    painter.setColor(Color.BLACK);
-                    painter.fillRect(x + j*size + 12, i*size + 12, size - 24, size - 24);
-                    painter.setColor(Color.WHITE);
-                    painter.drawRect(x + j*size + 12, i*size + 12, size - 24, size - 24);
-                }
                 painter.setColor(Color.WHITE);
                 painter.drawRect(x + j*size, i*size, size, size);
             }

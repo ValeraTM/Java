@@ -5,13 +5,25 @@ import model.Cell;
 import java.awt.Color;
 
 public abstract class Shape {
-    static final char EMPTY = '_';
-    static final char BUSY = '*';
+    protected static final char EMPTY = '_';
+    protected static final char BUSY = '*';
 
-    Cell color;
-    int width;
-    int height;
+    protected Cell color;
+    protected int width;
+    protected int height;
 
+    public int getOffsetX() {
+        return 0;
+    }
+    public int getOffsetY() {
+        return 0;
+    }
+    public int getEndY() {
+        return height;
+    }
+    public int getEndX() {
+        return width;
+    }
     public abstract boolean getEnd(int x, int y);
     public abstract void rotateLeft();
     public abstract void rotateRight();
