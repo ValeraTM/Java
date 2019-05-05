@@ -1,24 +1,11 @@
-import model.Factory;
-
-import java.io.FileInputStream;
-
 public class App {
-    private static void usage() {
-        System.out.println("Must be one argument");
-        System.out.println("First argument must be config file for factory");
-    }
-
     public static void main(String[] args) {
-        if (args.length != 1) {
-            usage();
-            return;
+        int height = 24;
+        int width = 10;
+        if (args.length == 2) {
+            height = Integer.parseUnsignedInt(args[0]);
+            width = Integer.parseUnsignedInt(args[1]);
         }
-        try {
-            String configFactory = args[0];
-            Controller boss = new Controller(new Factory(new FileInputStream(configFactory)));
-        }
-        catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        Controller boss = new Controller(height, width);
     }
 }

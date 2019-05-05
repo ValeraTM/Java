@@ -7,7 +7,7 @@ public class Bomb extends Shape {
     private final static String[] FORMS = {"*"};
     private final static int RADIUS = 3;
 
-    public Bomb(int idxForm, Cell color) {
+    public Bomb(int idx, Cell color) {
         super.color = color;
         super.width = SIZE[0];
         super.height = SIZE[1];

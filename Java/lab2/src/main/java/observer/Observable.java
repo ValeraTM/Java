@@ -5,7 +5,7 @@ public interface Observable {
         FIELD,
         NEXT_FIGURE,
         SCORE,
-        RECORD
+        END_GAME
     }
 
     void registerObserver(Observer o);

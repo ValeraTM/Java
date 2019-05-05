@@ -3,62 +3,38 @@ package model;
 import model.figures.Shape;
 import observer.Observable;
 import observer.Observer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
-import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Game implements Observable {
-    public Game(int width, int height, Factory factory) {
-        observers = new LinkedList<>();
-        this.factory = factory;
-        field = new Glass(height, width);
-        figure = getNewFigure();
-        newFigure = getNewFigure();
-        x = width/2;
-        y = height - 1;
+    private static final Logger logger = LogManager.getLogger(Game.class);
 
+    public Game(int width, int height) {
+        logger.info("Created Tetris " + height + "x" + width);
         try {
-            ObjectInputStream file = new ObjectInputStream(new FileInputStream("src/main/resources/HighScores.ser"));
-            records = (Scores)file.readObject();
+            factory = new Factory();
+            logger.info("Created Factory");
         }
         catch (Exception ex) {
-            records = new Scores();
+            logger.fatal("FactoryConfigNotFoundException", ex);
+            System.exit(-1);
         }
-    }
-
-    @Override
-    public void notifyObservers(Update mark) {
-        for (Observer it : observers) {
-            switch (mark) {
-                case FIELD:
-                    it.updateField(field);
-                    break;
-                case NEXT_FIGURE:
-                    it.updateNextFigure(newFigure);
-                    break;
-                case SCORE:
-                    it.updateScore(score);
-                    break;
-                case RECORD:
-                    records.addNewRecord(it.getRecord(), score);
-            }
-        }
-    }
-
-    @Override
-    public void removeObserver(Observer o) {
-        observers.remove(o);
-    }
-
-    @Override
-    public void registerObserver(Observer o) {
-        observers.add(o);
+        observers = new LinkedList<>();
+        field = new Glass(height, width);
+        x = width/2;
+        y = height - 1;
+        records = Scores.openScores("src/main/resources/HighScores.ser");
     }
 
     public void startGame() {
+        logger.info("New Game");
+        figure = getNewFigure();
+        newFigure = getNewFigure();
         field.updateFigure(figure, y, x, figure.getCell());
         notifyObservers(Update.SCORE);
         notifyObservers(Update.FIELD);
@@ -68,12 +44,13 @@ public class Game implements Observable {
             field.updateFigure(figure, y, x, Cell.EMPTY);
             if (!moveDown()) {
                 if (!fall()) {
-                    notifyObservers(Update.RECORD);
+                    notifyObservers(Update.END_GAME);
                     clear();
                     return;
                 }
 
                 timer.setDelay(delay - score/1000*25);
+                logger.debug("Current TimerDelay: " + timer.getDelay());
 
                 if (checkFilledRow()) {
                     notifyObservers(Update.SCORE);
@@ -83,6 +60,7 @@ public class Game implements Observable {
             }
             field.updateFigure(figure, y, x, figure.getCell());
             notifyObservers(Update.FIELD);
+            logger.debug("Current position: " + x + " " + y);
         });
 
         timer.setInitialDelay(delay*3);
@@ -113,6 +91,8 @@ public class Game implements Observable {
         }
         field.updateFigure(figure, y, x, figure.getCell());
         notifyObservers(Update.FIELD);
+
+        logger.debug("Current position: " + x + " " + y);
     }
     public void moveRight() {
         field.updateFigure(figure, y, x, Cell.EMPTY);
@@ -138,6 +118,8 @@ public class Game implements Observable {
         }
         field.updateFigure(figure, y, x, figure.getCell());
         notifyObservers(Update.FIELD);
+
+        logger.debug("Current position: " + x + " " + y);
     }
     public boolean rotateRight() {
         field.updateFigure(figure, y, x, Cell.EMPTY);
@@ -149,6 +131,7 @@ public class Game implements Observable {
         }
         field.updateFigure(figure, y, x, figure.getCell());
         notifyObservers(Update.FIELD);
+        logger.debug("Turn Right");
         return true;
     }
     public boolean rotateLeft() {
@@ -161,6 +144,7 @@ public class Game implements Observable {
         }
         field.updateFigure(figure, y, x, figure.getCell());
         notifyObservers(Update.FIELD);
+        logger.debug("Turn Left");
         return true;
     }
     public void setDelay(int delay) {
@@ -171,13 +155,12 @@ public class Game implements Observable {
     }
     public void clear() {
         timer.stop();
-        figure = getNewFigure();
-        newFigure = getNewFigure();
         x = field.getWidth()/2;
         y = field.getHeight() - 1;
         field.clear();
         score = 0;
         notifyObservers(Update.FIELD);
+        logger.info("End Game");
     }
     public void saveRecords() {
         records.saveRecords();
@@ -216,7 +199,7 @@ public class Game implements Observable {
     }
     private boolean checkFilledRow() {
         int count = field.destroyFilledRow();
-
+        logger.info("Destroyed " + count + " rows");
         switch (count) {
             case 1:
                 score += 100;
@@ -230,7 +213,6 @@ public class Game implements Observable {
             case 4:
                 score += 1500;
         }
-
         figure = newFigure;
         newFigure = getNewFigure();
         x = field.getWidth()/2;
@@ -240,16 +222,20 @@ public class Game implements Observable {
     }
     private Shape getNewFigure() {
         try {
-            return factory.createRandomProduct();
+            Shape it = factory.createRandomProduct();
+            logger.info("Created Shape: " + it.getClass().getName() + " " + it.getColor());
+            return it;
         }
         catch (Exception ex) {
+            logger.fatal("ShapeNotFoundException", ex);
+            System.exit(1);
             return null;
         }
     }
     private boolean canRotate() {
         for (int i = 0; i < figure.getHeight(); i++) {
             for (int j = 0; j < figure.getWidth(); j++) {
-                if (x + j >= field.getWidth()) {
+                if (x + j >= field.getWidth() || y - i < 0) {
                     return false;
                 }
                 if (!figure.isEmpty(j, i) && !field.isEmpty(x + j, y - i)) {
@@ -258,6 +244,38 @@ public class Game implements Observable {
             }
         }
         return true;
+    }
+
+    @Override
+    public void notifyObservers(Update mark) {
+        for (Observer it : observers) {
+            switch (mark) {
+                case FIELD:
+                    it.updateField(field);
+                    break;
+                case NEXT_FIGURE:
+                    it.updateNextFigure(newFigure);
+                    break;
+                case SCORE:
+                    it.updateScore(score);
+                    logger.info("Score Updated: " + score);
+                    break;
+                case END_GAME:
+                    records.addNewRecord(it.getRecord(), score);
+            }
+        }
+    }
+
+    @Override
+    public void removeObserver(Observer o) {
+        observers.remove(o);
+        logger.info("Removed observer: " + o.getClass().getName());
+    }
+
+    @Override
+    public void registerObserver(Observer o) {
+        observers.add(o);
+        logger.info("Registered observer: " + o.getClass().getName());
     }
 
     private int x;
