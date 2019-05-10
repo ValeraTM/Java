@@ -1,10 +1,10 @@
 package model;
 
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
 import model.figures.Shape;
 import observer.Observable;
 import observer.Observer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.swing.Timer;
 import java.awt.event.ActionEvent;
@@ -12,23 +12,22 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Game implements Observable {
-    private static final Logger logger = LogManager.getLogger(Game.class);
+    private static final Logger logger = (Logger)LoggerFactory.getLogger(Game.class);
 
     public Game(int width, int height) {
-        logger.info("Created Tetris " + height + "x" + width);
         try {
             factory = new Factory();
             logger.info("Created Factory");
         }
         catch (Exception ex) {
-            logger.fatal("FactoryConfigNotFoundException", ex);
+            logger.error("FactoryConfigNotFoundException", ex);
             System.exit(-1);
         }
         observers = new LinkedList<>();
         field = new Glass(height, width);
-        x = width/2;
-        y = height - 1;
-        records = Scores.openScores("src/main/resources/HighScores.ser");
+        x = field.getWidth()/2;
+        y = field.getHeight() - 1;
+        records = Scores.openScores(Scores.class.getClassLoader().getResourceAsStream("HighScores.ser"));
     }
 
     public void startGame() {
@@ -54,6 +53,7 @@ public class Game implements Observable {
 
                 if (checkFilledRow()) {
                     notifyObservers(Update.SCORE);
+                    logger.info("Score Updated: " + score);
                 }
 
                 notifyObservers(Update.NEXT_FIGURE);
@@ -165,9 +165,6 @@ public class Game implements Observable {
     public void saveRecords() {
         records.saveRecords();
     }
-    public List getRecords() {
-        return records.getRecords();
-    }
 
     private boolean moveDown() {
         if (y - figure.getHeight() + 1 != 0) {
@@ -191,7 +188,7 @@ public class Game implements Observable {
         return false;
     }
     private boolean fall() {
-        if (y > field.getBorder()) {
+        if (y >= field.getBorder()) {
             return false;
         }
         field.setFigure(figure, x, y);
@@ -227,7 +224,7 @@ public class Game implements Observable {
             return it;
         }
         catch (Exception ex) {
-            logger.fatal("ShapeNotFoundException", ex);
+            logger.error("ShapeNotFoundException", ex);
             System.exit(1);
             return null;
         }
@@ -245,23 +242,21 @@ public class Game implements Observable {
         }
         return true;
     }
-
     @Override
     public void notifyObservers(Update mark) {
         for (Observer it : observers) {
             switch (mark) {
                 case FIELD:
-                    it.updateField(field);
+                    it.updateField();
                     break;
                 case NEXT_FIGURE:
-                    it.updateNextFigure(newFigure);
+                    it.updateNextFigure();
                     break;
                 case SCORE:
-                    it.updateScore(score);
-                    logger.info("Score Updated: " + score);
+                    it.updateScore();
                     break;
                 case END_GAME:
-                    records.addNewRecord(it.getRecord(), score);
+                    it.endGame();
             }
         }
     }
@@ -276,6 +271,22 @@ public class Game implements Observable {
     public void registerObserver(Observer o) {
         observers.add(o);
         logger.info("Registered observer: " + o.getClass().getName());
+    }
+
+    public Glass getField() {
+        return field;
+    }
+    public Shape getNextFigure() {
+        return newFigure;
+    }
+    public int getScore() {
+        return score;
+    }
+    public List getRecords() {
+        return records.getRecords();
+    }
+    public void addNewRecord(String name, int score) {
+        records.addNewRecord(name, score);
     }
 
     private int x;

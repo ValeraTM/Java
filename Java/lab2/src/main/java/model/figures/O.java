@@ -7,7 +7,7 @@ public class O extends Shape {
     private final static String[] FORMS = {"****"};
 
     public O(int idxForm, Cell color) {
-        super.color = color;
+        super.cell = color;
         super.width = SIZE[0];
         super.height = SIZE[0];
     }

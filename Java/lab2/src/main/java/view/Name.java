@@ -1,14 +1,17 @@
 package view;
 
+import observer.Observer;
+
 import javax.swing.*;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.PlainDocument;
 import java.awt.event.*;
 
-public class Name extends JDialog {
+public class Name extends JDialog implements Observer {
     private JPanel contentPane;
     private JButton buttonOK;
+
     private JTextField textField;
 
     public Name(ActionListener listener, JFrame parent) {
@@ -35,14 +38,16 @@ public class Name extends JDialog {
         buttonOK.addActionListener(listener);
 
         this.pack();
-        setMaximumSize(getSize());
+        this.setMaximumSize(getSize());
+    }
+
+    @Override
+    public void endGame() {
+        textField.setText(null);
+        this.setVisible(true);
     }
 
     public String getName() {
         return textField.getText();
-    }
-
-    void clear() {
-        textField.setText(null);
     }
 }

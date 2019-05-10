@@ -9,7 +9,7 @@ public class J extends Shape {
 
     public J(int idxForm, Cell color) {
         this.idxForm = idxForm % FORMS.length;
-        super.color = color;
+        super.cell = color;
         super.width = SIZE[this.idxForm % 2];
         super.height = SIZE[(this.idxForm + 1) % 2];
     }

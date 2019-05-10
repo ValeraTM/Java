@@ -1,13 +1,16 @@
 package view;
 
+import model.Game;
+import model.Glass;
+import observer.Observer;
+
 import javax.swing.*;
 import java.awt.*;
 
-public class PlayField extends JPanel {
-    PlayField(int height, int width) {
-        this.height = height;
-        this.width = width;
-        colors = new Color[height*width];
+public class PlayField extends JPanel implements Observer {
+    public PlayField(Game model) {
+        this.model = model;
+        this.setOpaque(false);
     }
 
     @Override
@@ -15,27 +18,33 @@ public class PlayField extends JPanel {
         Graphics2D painter = (Graphics2D)g;
         super.paint(painter);
 
-        int sizeY = this.getHeight()/height;
-        int sizeX = this.getWidth()/width;
+        Glass field = model.getField();
+
+        int sizeY = this.getHeight()/field.getHeight();
+        int sizeX = this.getWidth()/field.getWidth();
         int size = Integer.min(sizeX, sizeY);
-        int x = this.getWidth() - width*size;
+        int x = this.getWidth() - field.getWidth()*size;
 
         painter.setStroke(new BasicStroke(3f));
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++  ) {
-                painter.setColor(colors[i*width + j]);
+        for (int i = 0; i < field.getHeight(); i++) {
+            for (int j = 0; j < field.getWidth(); j++  ) {
+                painter.setColor(field.getColor(j, field.getHeight() - 1 - i));
                 painter.fillRect(x + j*size, i*size, size, size);
                 painter.setColor(Color.WHITE);
                 painter.drawRect(x + j*size, i*size, size, size);
+
+                if (field.getHeight() - i == field.getBorder()) {
+                    painter.setColor(Color.RED);
+                    painter.drawLine(x,i*size, x + field.getWidth()*size,i*size);
+                }
             }
         }
     }
 
-    void fillRect(int idx, Color color) {
-        colors[idx] = color;
+    @Override
+    public void updateField() {
+        repaint();
     }
 
-    private int height;
-    private int width;
-    private Color[] colors;
+    private Game model;
 }

@@ -8,14 +8,14 @@ public class Bomb extends Shape {
     private final static int RADIUS = 3;
 
     public Bomb(int idx, Cell color) {
-        super.color = color;
+        super.cell = color;
         super.width = SIZE[0];
         super.height = SIZE[1];
     }
 
     @Override
     public boolean getEnd(int x, int y) {
-        color = Cell.EMPTY;
+        cell = Cell.EMPTY;
         return (x >= 0 && x < RADIUS && y >= 0 && y < RADIUS);
     }
 

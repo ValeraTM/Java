@@ -8,7 +8,7 @@ public abstract class Shape {
     protected static final char EMPTY = '_';
     protected static final char BUSY = '*';
 
-    protected Cell color;
+    protected Cell cell;
     protected int width;
     protected int height;
 
@@ -33,11 +33,11 @@ public abstract class Shape {
     public final int getWidth() {
         return width;
     }
-    public Color getColor() {
-        return color.getColor();
+    public final Color getColor() {
+        return cell.getColor();
     }
-    public Cell getCell() {
-        return color;
+    public final Cell getCell() {
+        return cell;
     }
     public abstract boolean isEmpty(int x, int y);
 }

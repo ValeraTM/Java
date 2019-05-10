@@ -3,22 +3,27 @@ package controller;
 import model.Game;
 import view.*;
 
+import ch.qos.logback.classic.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class StartMenu extends JFrame implements KeyListener, ActionListener {
-    public StartMenu(Game model, NewGame game){
+    private final static Logger logger = (Logger)LoggerFactory.getLogger(StartMenu.class);
+
+    public StartMenu(Game model, JPanel game){
         this.setLocationRelativeTo(null);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setTitle("Tetris");
 
         this.model = model;
+        model.registerObserver(dialog);
         newGame = game;
-        newGame.setObserverForScores(dialog);
 
         Font mainFont = new Font("Controller", Font.BOLD, 36);
         JButton start = new JButton("New Game");
@@ -151,9 +156,9 @@ public class StartMenu extends JFrame implements KeyListener, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent event) {
+        logger.info("Pressed " + event.getActionCommand());
         switch (event.getActionCommand()) {
             case "Exit":
-                model.saveRecords();
                 dispose();
                 break;
             case "About":
@@ -174,6 +179,8 @@ public class StartMenu extends JFrame implements KeyListener, ActionListener {
                 String name = dialog.getName();
                 if (name.length() != 0) {
                     dialog.setVisible(false);
+                    model.addNewRecord(name, model.getScore());
+                    model.saveRecords();
                     changeVisibleNewGame();
                 }
         }
@@ -185,6 +192,7 @@ public class StartMenu extends JFrame implements KeyListener, ActionListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        logger.debug("Pressed " + KeyEvent.getKeyText(e.getKeyCode()));
         switch (e.getKeyCode()) {
             case KeyEvent.VK_RIGHT:
                 model.moveRight();
@@ -214,14 +222,18 @@ public class StartMenu extends JFrame implements KeyListener, ActionListener {
 
     private Scores score = new Scores();
     private Name dialog = new Name(this,this);
-    private JPanel menu = new JPanel() {
+    private JPanel menu = new JPanel(true) {
         @Override
         public void paint(Graphics g) {
             try {
-                Image img = ImageIO.read(new File("src/main/resources/2.jpg"));
+                InputStream in = this.getClass().getClassLoader().getResourceAsStream("StartMenu.jpg");
+                if (in == null) {
+                    throw new IOException("StartMenu.jpg not found");
+                }
+                Image img = ImageIO.read(in);
                 g.drawImage(img, 0,0,this);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                logger.warn("Texture for Main Menu", ex);
             }
             super.paint(g);
         }
@@ -230,10 +242,14 @@ public class StartMenu extends JFrame implements KeyListener, ActionListener {
         @Override
         public void paint(Graphics g) {
             try {
-                Image img = ImageIO.read(new File("src/main/resources/3.jpg"));
+                InputStream in = this.getClass().getClassLoader().getResourceAsStream("MainTexture.jpg");
+                if (in == null) {
+                    throw new IOException("MainTexture.jpg not found");
+                }
+                Image img = ImageIO.read(in);
                 g.drawImage(img, 0,0,this);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (IOException ex) {
+                logger.warn("Texture for High Scores", ex);
             }
             super.paint(g);
         }
@@ -242,14 +258,18 @@ public class StartMenu extends JFrame implements KeyListener, ActionListener {
         @Override
         public void paint(Graphics g) {
             try {
-                Image img = ImageIO.read(new File("src/main/resources/3.jpg"));
-                g.drawImage(img, 0,0,null);
-            } catch (IOException e) {
-                e.printStackTrace();
+                InputStream in = this.getClass().getClassLoader().getResourceAsStream("MainTexture.jpg");
+                if (in == null) {
+                    throw new IOException("MainTexture.jpg not found");
+                }
+                Image img = ImageIO.read(in);
+                g.drawImage(img, 0,0,this);
+            } catch (IOException ex) {
+                logger.warn("Texture for About", ex);
             }
             super.paint(g);
         }
     };
-    private NewGame newGame;
+    private JPanel newGame;
     private Game model;
 }

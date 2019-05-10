@@ -1,12 +1,19 @@
 import controller.StartMenu;
 import model.Game;
-import view.NewGame;
+import view.*;
 
 class Controller {
     Controller(int height, int width) {
-        NewGame view = new NewGame(height, width);
         Game model = new Game(width, height);
-        model.registerObserver(view);
+
+        PlayField field = new PlayField(model);
+        NextFigure nextFigure = new NextFigure(model);
+        GameScore score = new GameScore(model);
+        model.registerObserver(field);
+        model.registerObserver(nextFigure);
+        model.registerObserver(score);
+
+        NewGame view = new NewGame(field, nextFigure, score);
         StartMenu menu = new StartMenu(model, view);
     }
 }

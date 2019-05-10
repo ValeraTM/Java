@@ -2,8 +2,8 @@ package model;
 
 import model.figures.Shape;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.Random;
 
@@ -12,12 +12,16 @@ public class Factory {
     private final Object[] keys;
     private final Random random = new Random();
 
-    Factory() throws IOException {
-        creators.load(new FileInputStream("src/main/resources/FactoryConfig.properties"));
+    public Factory() throws IOException {
+        InputStream in = Factory.class.getClassLoader().getResourceAsStream("FactoryConfig.properties");
+        if (in == null) {
+            throw new IOException("FactoryConfig.properties not found");
+        }
+        creators.load(in);
         keys = creators.keySet().toArray();
     }
 
-    Shape createRandomProduct() throws Exception {
+    public Shape createRandomProduct() throws Exception {
         return createProductById((String)keys[random.nextInt(keys.length)]);
     }
 

@@ -6,7 +6,7 @@ import java.awt.Color;
 import java.util.LinkedList;
 
 public class Glass {
-    Glass(int height, int width) {
+    public Glass(int height, int width) {
         this.height = height;
         this.border = height - 4;
         this.width = width;
@@ -19,7 +19,7 @@ public class Glass {
         }
     }
 
-    void setFigure(Shape figure, int x, int y) {
+    public void setFigure(Shape figure, int x, int y) {
         for (int i = 0; i < figure.getEndY(); i++) {
             for (int j = 0; j < figure.getEndX(); j++) {
                 if (y - figure.getOffsetY() -i >= 0 && x + j + figure.getOffsetX() >= 0 && x + j + figure.getOffsetX() < width) {
@@ -30,7 +30,7 @@ public class Glass {
             }
         }
     }
-    int destroyFilledRow() {
+    public int destroyFilledRow() {
         int count = 0;
         for (int j = 0; j < border; j++) {
             boolean isFilled = true;
@@ -58,7 +58,7 @@ public class Glass {
         field.addLast(line);
     }
 
-    void updateFigure(Shape figure, int y, int x, Cell color) {
+    public void updateFigure(Shape figure, int y, int x, Cell color) {
         for (int i = 0; i < figure.getHeight(); i++) {
             for (int j = 0; j < figure.getWidth(); j++) {
                 if (!figure.isEmpty(j, i)) {
@@ -80,11 +80,11 @@ public class Glass {
     public int getWidth() {
         return width;
     }
-    int getBorder() {
+    public int getBorder() {
         return border;
     }
 
-    void clear() {
+    public void clear() {
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 field.get(i)[j] = Cell.EMPTY;

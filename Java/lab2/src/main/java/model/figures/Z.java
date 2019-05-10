@@ -9,7 +9,7 @@ public class Z extends Shape {
 
     public Z(int idxForm, Cell color) {
         this.idxForm = idxForm % FORMS.length;
-        this.color = color;
+        this.cell = color;
         super.width = SIZE[this.idxForm % 2];
         super.height = SIZE[(this.idxForm + 1) % 2];
     }
