@@ -83,7 +83,7 @@ public class Controller extends JFrame implements ActionListener, ChatObserver {
         join.addActionListener(this);
 
         this.pack();
-        this.setMinimumSize(new Dimension(this.getWidth() + 380, this.getHeight() + 200));
+        this.setMinimumSize(new Dimension(this.getWidth() + 450, this.getHeight() + 200));
         this.setResizable(false);
         this.setVisible(true);
     }
@@ -118,4 +118,14 @@ public class Controller extends JFrame implements ActionListener, ChatObserver {
     private ChatInput input;
     private JPanel chat;
     private Client client;
+
+    public static void main(String[] args) {
+        Client client = new Client();
+        ChatInput in = new ChatInput(client);
+        ChatOutput out = new ChatOutput(client);
+        client.registerObserver(out);
+
+        Controller it = new Controller(client, in, out);
+        client.registerObserver(it);
+    }
 }

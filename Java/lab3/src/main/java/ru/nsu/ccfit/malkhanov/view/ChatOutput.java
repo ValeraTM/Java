@@ -15,7 +15,7 @@ public class ChatOutput extends JPanel implements ChatObserver {
 
         JScrollPane scrollForView = new JScrollPane(view);
         scrollForView.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollForView.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollForView.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
         view.setEditable(false);
 
@@ -29,25 +29,6 @@ public class ChatOutput extends JPanel implements ChatObserver {
 
         this.add(scrollForView, BorderLayout.CENTER);
         this.add(scrollForList, BorderLayout.EAST);
-
-        StyledDocument doc = new DefaultStyledDocument() {
-            @Override
-            public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
-                if (str == null) {
-                    return;
-                }
-                int size = 38;
-                StringBuilder it = new StringBuilder(str);
-                int rows = str.length() / size;
-                int idx = size;
-                for (int i = 0; i < rows; i++) {
-                    it.insert(idx, '\n');
-                    idx += size + 1;
-                }
-                super.insertString(offs, it.toString(), a);
-            }
-        };
-        view.setDocument(doc);
 
         StyleConstants.setForeground(forName, Color.BLACK);
         StyleConstants.setBold(forName, true);
@@ -81,7 +62,18 @@ public class ChatOutput extends JPanel implements ChatObserver {
             doc.insertString(doc.getLength(), message.getName(), forName);
             doc.insertString(doc.getLength(), " " + message.getTime() + '\n', forDate);
             doc.insertString(doc.getLength(), "\n", forSpace);
-            doc.insertString(doc.getLength(), message.getMessage() + '\n', forMessage);
+
+            String[] words = message.getMessage().split(" ");
+            for (int i = 0, count = 0; i < words.length; i++) {
+                if (count >= 40) {
+                    doc.insertString(doc.getLength(), "\n", forMessage);
+                    doc.insertString(doc.getLength(), "\n", forSpace);
+                    count = 0;
+                }
+                doc.insertString(doc.getLength(), words[i] + ' ', forMessage);
+                count += words[i].length();
+            }
+
             doc.insertString(doc.getLength(), "\n", forSpace);
             doc.insertString(doc.getLength(), "\n", forSpace);
         }

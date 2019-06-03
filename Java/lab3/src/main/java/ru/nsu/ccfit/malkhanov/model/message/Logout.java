@@ -2,11 +2,9 @@ package ru.nsu.ccfit.malkhanov.model.message;
 
 import ru.nsu.ccfit.malkhanov.interfaces.MessageHandler;
 
-import java.io.IOException;
-
 public class Logout extends Message {
     @Override
-    public void visit(MessageHandler handler) throws IOException {
+    public void visit(MessageHandler handler) {
         handler.handle(this);
     }
 }

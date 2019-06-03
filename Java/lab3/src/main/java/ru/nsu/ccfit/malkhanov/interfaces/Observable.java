@@ -1,12 +1,9 @@
 package ru.nsu.ccfit.malkhanov.interfaces;
 
+import java.util.function.Consumer;
+
 public interface Observable {
-    enum Update {
-        MESSAGE,
-        LOGOUT,
-        USER_LIST
-    }
     void registerObserver(ChatObserver o);
     void removeObserver(ChatObserver o);
-    void notifyObservers(Update it);
+    void notifyObservers(Consumer<ChatObserver> it);
 }

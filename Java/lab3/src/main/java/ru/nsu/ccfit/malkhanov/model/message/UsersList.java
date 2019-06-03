@@ -4,8 +4,8 @@ import ru.nsu.ccfit.malkhanov.interfaces.MessageHandler;
 
 import java.util.List;
 
-public class RequestToListUsers extends Message {
-    public RequestToListUsers(List users) {
+public class UsersList extends Message {
+    public UsersList(List users) {
         this.users = users;
     }
 
